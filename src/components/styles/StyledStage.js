@@ -9,10 +9,40 @@ export const StyledStage = styled.div`
     grid-template-columns: repeat(${props => props.width}, 1fr);
     grid-gap: 1px;
     border: 2px solid #333;
-    border-radius: 10px;  
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);  
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 25vw;
-    background: linear-gradient(145deg, #111, #333);  
-    overflow: hidden;  
+    background: linear-gradient(145deg, #111, #333);
+    overflow: hidden;
+
+    @media (max-width: 1200px) {
+        grid-template-rows: repeat(
+            ${props => props.height},
+            calc(35vw / ${props => props.width})
+        );
+        max-width: 35vw;
+        border: 1.5px solid #333;
+        border-radius: 8px;
+    }
+
+    @media (max-width: 768px) {
+        grid-template-rows: repeat(
+            ${props => props.height},
+            calc(50vw / ${props => props.width})
+        );
+        max-width: 50vw;
+        border: 1px solid #333;
+        border-radius: 6px;
+    }
+
+    @media (max-width: 480px) {
+        grid-template-rows: repeat(
+            ${props => props.height},
+            calc(75vw / ${props => props.width})
+        );
+        max-width: 75vw;
+        border: 0.5px solid #333;
+        border-radius: 4px;
+    }
 `;

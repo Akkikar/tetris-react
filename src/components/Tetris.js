@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { createStage, didCollide } from '../gameHelpers';
 
@@ -26,14 +26,16 @@ const Tetris = () => {
 
     console.log('re-render');
 
-    // left-right
-    const movePlayer = dir => {
-        if (didCollide(player, stage, { x: dir, y: 0 })) return;
-        updatePlayerPos({ x: dir, y: 0 });
+    // Move player left or right
+    const movePlayer = (dir) => {
+        if (!didCollide(player, stage, { x: dir, y: 0 })) {
+            updatePlayerPos({ x: dir, y: 0 });
+        }
     };
 
+    // Start game function
     const startGame = () => {
-        console.log('Game started');
+        // Reset everything
         setStage(createStage());
         setDropTime(1000); // 1 sec
         resetPlayer();
@@ -43,17 +45,18 @@ const Tetris = () => {
         setLevel(0);
     };
 
+    // Drop function
     const drop = () => {
-        // increase level when player has cleared 10 rows
+        // Increase level when player has cleared 10 rows
         if (rows > (level + 1) * 10) {
-            setLevel(prev => prev + 1);
-            // also increase the speed
+            setLevel((prev) => prev + 1);
+            // Also increase the speed
             setDropTime(1000 / (level + 1) + 100);
         }
 
         if (didCollide(player, stage, { x: 0, y: 1 })) {
             if (player.pos.y < 1) {
-                console.log('Game over');
+                console.log('Game Over');
                 setGameOver(true);
                 setDropTime(null);
             }
@@ -63,6 +66,7 @@ const Tetris = () => {
         }
     };
 
+    // Key up event handler
     const keyUp = ({ keyCode }) => {
         if (gameOver) return;
 
@@ -71,31 +75,95 @@ const Tetris = () => {
         }
     };
 
+    // Drop player function
     const dropPlayer = () => {
         setDropTime(null);
         drop();
     };
 
+    // Move function based on keyCode
     const move = ({ keyCode }) => {
         if (!gameOver) {
-            if (keyCode === 37) { // left
+            if (keyCode === 37) {
+                // left arrow key
                 movePlayer(-1);
-            } else if (keyCode === 39) { // right
+            } else if (keyCode === 39) {
+                // right arrow key
                 movePlayer(1);
-            } else if (keyCode === 40) { // down
+            } else if (keyCode === 40) {
+                // down arrow key
                 dropPlayer();
-            } else if (keyCode === 38) { // up
+            } else if (keyCode === 38) {
+                // up arrow key
                 playerRotate(stage, 1);
             }
         }
     };
 
+    // Touch start event handler
+    const handleTouchStart = (e) => {
+        e.preventDefault(); // Prevent default behavior like scrolling
+
+        const touchStartX = e.touches[0].clientX;
+        const touchStartY = e.touches[0].clientY;
+
+        const handleTouchMove = (e) => {
+            e.preventDefault(); // Prevent default behavior like scrolling
+
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
+
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                if (deltaX > 0) {
+                    movePlayer(1); // Move right
+                } else {
+                    movePlayer(-1); // Move left
+                }
+            } else {
+                if (deltaY > 0) {
+                    dropPlayer(); // Drop down
+                } else {
+                    playerRotate(stage, 1); // Rotate
+                }
+            }
+        };
+
+        document.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+        const handleTouchEnd = () => {
+            document.removeEventListener('touchmove', handleTouchMove);
+            document.removeEventListener('touchend', handleTouchEnd);
+        };
+
+        document.addEventListener('touchend', handleTouchEnd);
+    };
+
+    // Interval hook for dropping pieces
     useInterval(() => {
         drop();
     }, dropTime);
 
+    // Effect hook for touch start event
+    useEffect(() => {
+        document.addEventListener('touchstart', handleTouchStart, { passive: false });
+
+        return () => {
+            document.removeEventListener('touchstart', handleTouchStart);
+        };
+    }, []);
+
+    // Render the Tetris game interface
     return (
-        <StyledTetrisWrapper role="button" tabIndex="0" onKeyDown={e => move(e)} onKeyUp={keyUp}>
+        <StyledTetrisWrapper
+            role="button"
+            tabIndex="0"
+            onKeyDown={move}
+            onKeyUp={keyUp}
+            onTouchStart={handleTouchStart} // Add onTouchStart for direct touch interaction
+        >
             <StyledTetris>
                 <Stage stage={stage} />
                 <aside>

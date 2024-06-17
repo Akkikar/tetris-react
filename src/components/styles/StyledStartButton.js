@@ -26,4 +26,22 @@ export const StyledStartButton = styled.button`
         background: linear-gradient(145deg, #222, #444);
         transform: translateY(2px); 
     }
+
+    @media (max-width: 1200px) {
+        padding: 15px;
+        font-size: 0.9rem;
+        border-radius: 18px;
+    }
+
+    @media (max-width: 768px) {
+        padding: 10px;
+        font-size: 0.8rem;
+        border-radius: 16px;
+    }
+
+    @media (max-width: 480px) {
+        padding: 5px;
+        font-size: 0.7rem;
+        border-radius: 14px;
+    }
 `;
